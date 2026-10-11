@@ -1,0 +1,1 @@
+Hold ALT over anything in Core Keeper to see its name, where it comes from, plant growth, mob health and what else is on that tile.

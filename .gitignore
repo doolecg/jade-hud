@@ -1,0 +1,6 @@
+/sdk/
+/_decomp/
+/unity-*.log
+/build-*.log
+__pycache__/
+/dist/

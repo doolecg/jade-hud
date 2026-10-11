@@ -1,0 +1,21 @@
+# Doole's Jade HUD
+
+Ever stared at something glowing in the dark and wondered what it was? Jade HUD adds a small hover box, in the style of the Minecraft mod Jade. Point your mouse at something and hold **ALT**. A card pops up beside the cursor.
+
+## What it shows
+
+- The name and icon of whatever is under your cursor
+- Where it comes from: Core Keeper, or the name of the mod that added it
+- Everything else on that tile, like the dirt block and ground under an ore
+- Plant growth stage and time until the next stage
+- Mob health, like `Health: 220/220`
+
+## Good to know
+
+- It looks like the game's own item tooltip, so it fits right in.
+- It runs on your side only. Nobody else needs it, and it works when you join a server.
+- Tall walls are drawn over the tile behind them. Jade HUD picks the wall when you point at its top.
+- Plant timers work in single player and when you host. In someone else's world the time may show as "unknown".
+- It hides while a menu is open.
+
+Built for Core Keeper 1.3.x. Chest contents and furnace progress are planned.

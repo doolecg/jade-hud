@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Jade HUD for Core Keeper: plan</title>
+<style>
+:root{--bg:#1c1713;--panel:#2a221b;--text:#e9e0d2;--dim:#a89a86;--accent:#e0a040;--ok:#7fbf6a;--todo:#a89a86;--gap:16px}
+@media(prefers-color-scheme:light){:root{--bg:#f6f1e8;--panel:#fff;--text:#2a221b;--dim:#6b5f50;--accent:#a8661a}}
+body{background:var(--bg);color:var(--text);font:16px/1.5 system-ui,sans-serif;max-width:72ch;margin:32px auto;padding:0 var(--gap)}
+h1,h2{line-height:1.2}h2{margin-top:32px;border-bottom:1px solid var(--dim);padding-bottom:4px}
+.card{background:var(--panel);padding:var(--gap);margin:var(--gap) 0;border-left:4px solid var(--accent)}
+code{background:var(--panel);padding:0 4px}pre{background:var(--panel);padding:var(--gap);overflow:auto}
+li.done::marker{content:"[x] ";color:var(--ok)}li.todo::marker{content:"[ ] ";color:var(--todo)}
+.v{color:var(--ok)}.u{color:var(--accent)}
+</style>
+</head>
+<body>
+<h1>Jade HUD for Core Keeper</h1>
+<p>Client-side hover box built on the official Mod SDK. Shows item or object name, what breaks it, and where it comes from.</p>
+
+<h2>Checklist</h2>
+<ul>
+<li class="done">Game installed (Mono build, Steam).</li>
+<li class="done">Official Mod SDK cloned to <code>sdk/</code>.</li>
+<li class="done">Game code decompiled to <code>_decomp/</code> for reading (do not commit or share).</li>
+<li class="done">Install Unity Hub and editor <b>6000.0.59f2</b> with "Linux Build Support (Mono)". Needs a Unity login.</li>
+<li class="done">Open <code>sdk/</code> in Unity, create the mod in the PugMod window, then add the script.</li>
+<li class="done">Spike: log the name of the entity under the mouse.</li>
+<li class="done">Build the hover box from the game's own tooltip prefab.</li>
+<li class="todo">Final check in a peaceful creative world (1920x1080, GUI scale 2). Screenshots before and after.</li>
+</ul>
+
+<h2>What the code shows</h2>
+<div class="card">
+<p><span class="v">Read in the game code:</span></p>
+<ul>
+<li><code>API.Client</code> gives <code>LocalPlayer</code>, <code>World</code>, <code>GetGraphicalGameObject(Entity)</code>, <code>GetEntity(GameObject)</code>, and <code>OnObjectSpawnedOnClient</code>. This is the bridge from the world to ECS data.</li>
+<li><code>ObjectDataCD.objectID</code> on an entity, then <code>PugDatabase.GetObjectInfo(id)</code>, gives <code>icon</code>, <code>smallIcon</code>, <code>rarity</code>, <code>objectType</code>, <code>tags</code>.</li>
+<li><code>PlayerController.GetObjectName(...)</code> returns the localized name the game itself shows.</li>
+<li>The game already has a tooltip prefab: <code>SlotHoverTooltip</code> (title, icon, background, tags container, coin row). <code>UIMouse</code> owns it as <code>slotHoverTooltip</code>. Reusing it gives the exact game look.</li>
+<li><code>API.ModLoader.LoadedMods</code> lists mods with <code>Metadata</code>. <code>API.Localization</code> and <code>API.Config</code> exist.</li>
+<li>Harmony patches are supported. Burst code can't be patched.</li>
+</ul>
+<p><span class="u">Not yet known:</span></p>
+<ul>
+<li>How the game finds the world object under the cursor. I found no helper. Fallback: convert the mouse to a world point (<code>Camera.ScreenToWorldPoint</code>) and query entities near it.</li>
+<li>Which mod owns an <code>ObjectID</code>. The <code>ID</code> class is empty for mods, so ownership may need a lookup from each mod's loaded assets.</li>
+<li>"Tool that breaks it". There is no per-object tool field. The only hints are components: <code>DiggableCD</code> (shovel-type digging), <code>MineableCD</code> and <code>TileDamageTagCD</code> (pickaxe-type), <code>HealthCD</code> and <code>DamageableObjectCD</code> (anything with a weapon). The mapping from these to a tool name is my guess and needs in-game testing.</li>
+</ul>
+</div>
+
+<h2>Hover box design</h2>
+<pre>
+┌──────────────────────────┐
+│ [icon]  Copper Ore       │  name, rarity colour
+│ ──────────────────────── │
+│ [tool]  Pickaxe          │  tool icon + name
+│ [src ]  Core Keeper      │  game or mod name, dim
+└──────────────────────────┘
+</pre>
+<ul>
+<li>Reuse <code>SlotHoverTooltip</code> visuals: its background sprites, <code>PugText</code> font, tag styling. No new fonts or colours.</li>
+<li>Top center, below the health bar, so the cursor stays clear.</li>
+<li>Shown only when an object is under the cursor and no inventory tooltip is open.</li>
+<li>Icons from <code>ObjectInfo.smallIcon</code> at whole-number scale.</li>
+<li>Needs no server install: a client system only reads data. To be confirmed on a dedicated server.</li>
+</ul>
+
+<h2>Plants: growth stage and time to next stage</h2>
+<p>Added at your request. Shows "Growing, stage 2 of 4, next stage in 1m 20s" or "Ready to harvest".</p>
+<ul>
+<li><code>GrowingCD.currentStage</code> is synced to clients. The last stage comes from <code>ObjectPropertiesCD</code> (<code>HasReachedFinalStage</code>). Ready to harvest = final stage reached.</li>
+<li><code>GrowTimerCD</code> (<code>Value</code>, <code>StageTime</code>) sits on a separate timer entity (<code>GrowTimerRefCD</code>) and has no ghost fields. On a remote multiplayer client it is probably not visible, so the time-to-next-stage row would work in single player and when hosting only. To be tested.</li>
+<li>Time left per stage is my reading of <code>Value</code> against <code>StageTime</code>. Unverified until tested in game.</li>
+</ul>
+
+<h2>Status</h2>
+<ul>
+<li class="done">Unity 6000.0.59f2 and Linux Mono support installed on C; licence is Unity Personal.</li>
+<li class="done">SDK project imported with no compile errors.</li>
+<li class="done">Mod project <code>sdk/Assets/JadeHud</code> created from the SDK template.</li>
+<li class="todo">The SDK's EULA is normally accepted in its window before publishing. You accept it, not me.</li>
+</ul>
+</body>
+</html>
