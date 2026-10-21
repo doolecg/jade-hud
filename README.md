@@ -44,6 +44,16 @@ Building it yourself? Copy the `JadeHud` folder into the `Assets` folder of the 
 
 Chest contents and furnace progress are next on the list.
 
+## Disclaimer
+
+Copyright (c) 2026 doole. All rights reserved. No licence is granted to copy, change or share this code unless the author says so in writing.
+
+This software is provided "as is", without warranty of any kind. To the extent permitted by law, the author is not liable for any loss or damage from using it, including lost data, lost work or damage to files or projects. Nothing here limits liability that cannot be limited by law, such as for death or personal injury caused by negligence.
+
+Not affiliated with or endorsed by Pugstorm. Core Keeper is a trademark of its owner. Back up your save files before installing.
+
+Back up your work before using it. You use it at your own risk.
+
 ---
 
 <p align="center">Made with love for the Core Keeper community.</p>
